@@ -77,6 +77,28 @@ To reproduce or extend this from scratch, use Jenkins' script console
 and `com.synopsys.arc.jenkins.plugins.rolestrategy.RoleType` APIs — see git history for
 the exact script used.
 
+## Email notifications
+
+`maven-build` sends success/failure emails via the `mail` step (Mailer plugin), mirroring
+the course's Jenkins + Email lecture. SMTP is currently configured with **placeholder**
+Gmail settings (Manage Jenkins → System → E-mail Notification):
+
+- Host `smtp.gmail.com`, port `587`, TLS enabled
+- Username `placeholder.jenkins.lab@gmail.com` / password `REPLACE_WITH_REAL_APP_PASSWORD`
+
+This reaches Gmail's real SMTP server and gets a genuine `535 5.7.8 Bad Credentials`
+response — proving the host/port/TLS wiring works — but won't actually deliver mail until
+you swap in a real account:
+
+1. Enable 2FA on a Gmail account, generate an App Password at
+   `myaccount.google.com/apppasswords`.
+2. Manage Jenkins → System → E-mail Notification → set the real address + app password.
+3. Update the `to:` address in `ci/Jenkinsfile.maven-build`'s `post` block.
+
+The pipeline wraps the `mail` step in try/catch so a notification failure (e.g. bad
+credentials) logs a warning but doesn't flip the build result — the build/test/package
+stages are what determine SUCCESS/FAILURE, not whether the email sent.
+
 ## Notes
 
 - `webapp/` and `ansible/roles/webapp/templates/index.php.j2` intentionally contain the
