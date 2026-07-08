@@ -58,6 +58,25 @@ Refresh http://localhost:8081 to see them.
    Global Tool Configuration) and that the Jenkins container can reach the `web-nginx-php`
    container (they're on the same `lab` Docker network already).
 
+## Jenkins security (role-based access)
+
+The `role-strategy` plugin is installed and active (Role-Based Authorization Strategy).
+Set up via Jenkins' script console, mirroring the course's security section:
+
+- **admin** (global role, full `Overall/Administer`) — assigned to the `admin` user.
+- **read-only** (global role, `Overall/Read` + `Job/Read`) — assigned to `devuser`, so it
+  can see every job's status/config but not touch anything.
+- **ansible-builder** (project role, pattern `ansible-deploy-web`, grants `Build`/`Read`/
+  `Workspace`/`Cancel`) — assigned to `devuser`, so it can trigger *only* that one job.
+
+Demo login: `devuser` / `DevPass123!` — try building `ansible-deploy-web` (works) vs.
+`maven-build` (403, missing `Job/Build` permission there) to see the restriction in action.
+
+To reproduce or extend this from scratch, use Jenkins' script console
+(`/scriptText`, admin-only) with the `com.michelin.cio.hudson.plugins.rolestrategy.*`
+and `com.synopsys.arc.jenkins.plugins.rolestrategy.RoleType` APIs — see git history for
+the exact script used.
+
 ## Notes
 
 - `webapp/` and `ansible/roles/webapp/templates/index.php.j2` intentionally contain the
