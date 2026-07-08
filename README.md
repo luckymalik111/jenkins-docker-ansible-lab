@@ -1,9 +1,9 @@
-# Jenkins + Docker + Ansible + AWS Lab
+# Jenkins + Docker + Ansible Lab
 
 A self-contained, buildable version of the classic "Jenkins for DevOps" course
-project: Jenkins running in Docker, driving SSH/Ansible deployments, a MySQL
-database backed up to S3, a PHP+NGINX web app displaying data from that
-database, and a Maven build/test/package/email pipeline.
+project: Jenkins running in Docker, driving Ansible deployments, a PHP+NGINX
+web app displaying data from MySQL, and a Maven build/test/package/email
+pipeline.
 
 This is an original implementation of the same architecture the course
 teaches — not a copy of the course's own sample files (those live behind the
@@ -17,13 +17,13 @@ Repo: https://github.com/luckymalik111/jenkins-docker-ansible-lab
 |---|---|
 | Docker + Jenkins | [docker-compose.yml](docker-compose.yml), [jenkins/Dockerfile](jenkins/Dockerfile) |
 | Jenkins plugins (SSH, Ansible, Mail, Maven, Role Strategy) | [jenkins/plugins.txt](jenkins/plugins.txt) |
-| MySQL + backup to S3 | [sql/init.sql](sql/init.sql), [scripts/backup_db_to_s3.sh](scripts/backup_db_to_s3.sh) |
+| MySQL database of users | [sql/init.sql](sql/init.sql) |
 | Feed the DB with users | [scripts/feed_db.sh](scripts/feed_db.sh) |
 | Trigger Jenkins jobs from bash (with/without params) | [scripts/trigger_job.sh](scripts/trigger_job.sh) |
 | Jenkins + Ansible playbooks | [ansible/](ansible/) |
 | NGINX + PHP web app showing the users table | [webapp/](webapp/) |
 | Ansible role that redeploys the web table | [ansible/roles/webapp](ansible/roles/webapp) |
-| Jenkinsfiles (backup job, Ansible deploy job, Maven job) | [ci/](ci/) |
+| Jenkinsfiles (Ansible deploy job, Maven job) | [ci/](ci/) |
 | Maven build/test/package + email notification | [maven-sample/](maven-sample/), [ci/Jenkinsfile.maven-build](ci/Jenkinsfile.maven-build) |
 
 ## Quick start
@@ -47,14 +47,11 @@ Refresh http://localhost:8081 to see them.
 
 ## Wiring up Jenkins jobs
 
-1. Create credentials in Jenkins (Manage Jenkins → Credentials):
-   - `aws-backup-user`: Username/password credential holding your AWS access key ID/secret.
-2. Create three Pipeline jobs pointing at this repo, each using "Pipeline script from SCM"
+1. Create two Pipeline jobs pointing at this repo, each using "Pipeline script from SCM"
    with the script path set to one of:
-   - `ci/Jenkinsfile.backup`
    - `ci/Jenkinsfile.ansible-deploy`
    - `ci/Jenkinsfile.maven-build`
-3. For the Ansible job, make sure the `ansible` plugin is configured (Manage Jenkins →
+2. For the Ansible job, make sure the `ansible` plugin is configured (Manage Jenkins →
    Global Tool Configuration) and that the Jenkins container can reach the `web-nginx-php`
    container (they're on the same `lab` Docker network already).
 
@@ -80,20 +77,13 @@ the exact script used.
 ## Email notifications
 
 `maven-build` sends success/failure emails via the `mail` step (Mailer plugin), mirroring
-the course's Jenkins + Email lecture. SMTP is currently configured with **placeholder**
-Gmail settings (Manage Jenkins → System → E-mail Notification):
+the course's Jenkins + Email lecture. SMTP is configured (Manage Jenkins → System →
+E-mail Notification) against Gmail:
 
 - Host `smtp.gmail.com`, port `587`, TLS enabled
-- Username `placeholder.jenkins.lab@gmail.com` / password `REPLACE_WITH_REAL_APP_PASSWORD`
-
-This reaches Gmail's real SMTP server and gets a genuine `535 5.7.8 Bad Credentials`
-response — proving the host/port/TLS wiring works — but won't actually deliver mail until
-you swap in a real account:
-
-1. Enable 2FA on a Gmail account, generate an App Password at
-   `myaccount.google.com/apppasswords`.
-2. Manage Jenkins → System → E-mail Notification → set the real address + app password.
-3. Update the `to:` address in `ci/Jenkinsfile.maven-build`'s `post` block.
+- Auth via a Gmail App Password (`myaccount.google.com/apppasswords`), not the account's
+  real password — Google blocks plain-password SMTP auth entirely, and an App Password is
+  scoped/revocable independently of the main account credential.
 
 The pipeline wraps the `mail` step in try/catch so a notification failure (e.g. bad
 credentials) logs a warning but doesn't flip the build result — the build/test/package
