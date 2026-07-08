@@ -2,13 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Copy sources') {
-            // No SCM configured for this lab (see README) - the project is bind-mounted
-            // read-only at /workspace, so copy it into the writable workspace first.
-            steps {
-                sh 'cp -r /workspace/maven-sample .'
-            }
-        }
         stage('Build') {
             steps {
                 dir('maven-sample') {

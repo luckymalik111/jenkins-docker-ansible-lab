@@ -4,10 +4,10 @@ pipeline {
     stages {
         stage('Run Ansible Playbook') {
             steps {
-                withEnv(['ANSIBLE_ROLES_PATH=/workspace/ansible/roles']) {
+                withEnv(["ANSIBLE_ROLES_PATH=${env.WORKSPACE}/ansible/roles"]) {
                     ansiblePlaybook(
-                        playbook: '/workspace/ansible/playbooks/deploy-web.yml',
-                        inventory: '/workspace/ansible/inventory/hosts.ini',
+                        playbook: 'ansible/playbooks/deploy-web.yml',
+                        inventory: 'ansible/inventory/hosts.ini',
                         colorized: true
                     )
                 }
