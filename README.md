@@ -9,6 +9,8 @@ This is an original implementation of the same architecture the course
 teaches — not a copy of the course's own sample files (those live behind the
 course platform and aren't something I can fetch for you).
 
+Repo: https://github.com/luckymalik111/jenkins-docker-ansible-lab
+
 ## Stack
 
 | Course topic | Where it lives here |
@@ -33,7 +35,7 @@ docker compose up -d --build
 
 - Jenkins UI: http://localhost:8080 (initial admin password: `docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword`)
 - Web app: http://localhost:8081
-- MySQL: `localhost:3306` (see `.env` for credentials)
+- MySQL: `localhost:3307` (mapped off the default 3306 to avoid clashing with a local MySQL install; see `.env` for credentials)
 
 Seed some sample users:
 

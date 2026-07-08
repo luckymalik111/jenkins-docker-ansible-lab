@@ -24,4 +24,9 @@ RUN curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-27.
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
 
+# Jenkins runs as root (see docker-compose.yml) so it can reach the mounted
+# docker.sock, but job workspaces under /var/jenkins_home stay owned by uid
+# 1000 from earlier runs - trust them so git doesn't refuse to operate there.
+RUN git config --global --add safe.directory '*'
+
 USER jenkins
