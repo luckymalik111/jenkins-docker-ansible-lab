@@ -1,0 +1,5 @@
+.env
+backups/
+*.jar
+target/
+.vagrant/

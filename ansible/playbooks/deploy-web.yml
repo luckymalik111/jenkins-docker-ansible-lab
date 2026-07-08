@@ -1,0 +1,6 @@
+---
+- name: Update the users web table
+  hosts: webservers
+  gather_facts: false
+  roles:
+    - webapp

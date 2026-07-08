@@ -1,0 +1,10 @@
+---
+- name: Deploy latest index.php to the web server
+  template:
+    src: index.php.j2
+    dest: /var/www/html/index.php
+    mode: "0644"
+
+- name: Reload php-fpm to pick up changes
+  command: pkill -USR2 php-fpm83
+  ignore_errors: true

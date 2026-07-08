@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'DB_NAME', defaultValue: 'usersdb', description: 'Database to back up')
+        string(name: 'S3_BUCKET', defaultValue: '', description: 'Target S3 bucket name')
+    }
+
+    environment {
+        AWS_CREDS = credentials('aws-backup-user')
+    }
+
+    stages {
+        stage('Backup DB to S3') {
+            steps {
+                withEnv(["AWS_ACCESS_KEY_ID=${AWS_CREDS_USR}", "AWS_SECRET_ACCESS_KEY=${AWS_CREDS_PSW}"]) {
+                    sh "/workspace/scripts/backup_db_to_s3.sh ${params.DB_NAME} ${params.S3_BUCKET}"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,13 @@
+git:latest
+ssh-agent:latest
+ssh-slaves:latest
+ansible:latest
+matrix-auth:latest
+role-strategy:latest
+email-ext:latest
+mailer:latest
+maven-plugin:latest
+pipeline-stage-view:latest
+credentials-binding:latest
+timestamper:latest
+ws-cleanup:latest

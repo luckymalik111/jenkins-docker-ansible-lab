@@ -1,0 +1,9 @@
+---
+- name: Full lab provisioning
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Ping all hosts
+      ping:
+
+- import_playbook: deploy-web.yml

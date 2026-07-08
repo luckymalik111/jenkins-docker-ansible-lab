@@ -1,0 +1,54 @@
+services:
+  jenkins:
+    build:
+      context: ./jenkins
+    container_name: jenkins
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/workspace:ro
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=true
+    networks:
+      - lab
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-usersdb}
+      MYSQL_USER: ${MYSQL_USER:-labuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-labpass}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - lab
+
+  webapp:
+    build:
+      context: ./webapp
+    container_name: web-nginx-php
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - lab
+
+networks:
+  lab:
+    driver: bridge
+
+volumes:
+  jenkins_home:
+  mysql_data:

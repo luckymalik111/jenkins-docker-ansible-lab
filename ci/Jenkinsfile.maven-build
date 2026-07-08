@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Copy sources') {
+            // No SCM configured for this lab (see README) - the project is bind-mounted
+            // read-only at /workspace, so copy it into the writable workspace first.
+            steps {
+                sh 'cp -r /workspace/maven-sample .'
+            }
+        }
+        stage('Build') {
+            steps {
+                dir('maven-sample') {
+                    sh 'mvn -B clean compile'
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                dir('maven-sample') {
+                    sh 'mvn -B test'
+                }
+            }
+            post {
+                always {
+                    junit 'maven-sample/target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('Package') {
+            steps {
+                dir('maven-sample') {
+                    sh 'mvn -B package -DskipTests'
+                }
+                archiveArtifacts artifacts: 'maven-sample/target/*.jar', fingerprint: true
+            }
+        }
+    }
+
+    // Wire up the "Mail" or "Email Extension" plugin with an SMTP server
+    // (Manage Jenkins -> System) then add success/failure `mail` steps here,
+    // mirroring the course's Jenkins + Email lecture.
+}
